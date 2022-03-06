@@ -91,7 +91,7 @@
 - name: Ensure {{ github_pkg.name }} is executable
   ansible.builtin.file:
     path: "{{ github_download_location }}/{{ github_pkg.name }}"
-    mode: '0700'
+    mode: '0755'
 
 - name: Ensure {{ github_pkg.name }} post-install commands are run
   ansible.builtin.command:
