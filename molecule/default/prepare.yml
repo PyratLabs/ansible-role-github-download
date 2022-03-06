@@ -1,0 +1,31 @@
+---
+
+- name: Prepare containers for local-user install testing
+  hosts: all
+  become: true
+  tasks:
+    - name: Ensure a user group exists
+      group:
+        name: user
+        state: present
+
+    - name: Ensure a normal user exists
+      user:
+        name: engineer
+        group: user
+        state: present
+
+    - name: Ensure apt cache is updated
+      apt:
+        update_cache: true
+      when: ansible_pkg_mgr == 'apt'
+
+    - name: Ensure unzip is installed
+      package:
+        name: unzip
+        state: present
+
+    - name: Ensure git is installed
+      package:
+        name: git
+        state: present

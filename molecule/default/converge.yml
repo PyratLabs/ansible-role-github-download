@@ -1,0 +1,52 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  become_user: engineer
+  tasks:
+    - name: "Include ansible-role-github-download"
+      include_role:
+        name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
+      vars:
+        github_download_packages:
+          - name: kops
+            repo: kubernetes/kops
+            version: "{{ lookup('env', 'KOPS_VERSION') | default('latest', true) }}"
+            filename: "kops-%OS%-%ARCH%"
+          - name: channels
+            repo: kubernetes/kops
+            version: "{{ lookup('env', 'KOPS_VERSION') | default('latest', true) }}"
+            filename: "channels-%OS%-%ARCH%"
+          - name: nodeup
+            repo: kubernetes/kops
+            version: "{{ lookup('env', 'KOPS_VERSION') | default('latest', true) }}"
+            filename: "nodeup-%OS%-%ARCH%"
+          - name: protokube
+            repo: kubernetes/kops
+            version: "{{ lookup('env', 'KOPS_VERSION') | default('latest', true) }}"
+            filename: "protokube-%OS%-%ARCH%"
+          - name: kubeconform
+            repo: yannh/kubeconform
+            version: "{{ lookup('env', 'KUBECONFORM_VERSION') | default('latest', true) }}"
+            filename: "kubeconform-%OS%-%ARCH%.tar.gz"
+          - name: k9s
+            repo: derailed/k9s
+            version: "{{ lookup('env', 'K9S_VERSION') | default('latest', true) }}"
+            filename: "k9s_%OSCAPITALIZED%_%ARCHRAW%.tar.gz"
+          - name: k3d
+            repo: k3d-io/k3d
+            version: "{{ lookup('env', 'K3D_VERSION') | default('latest', true) }}"
+            filename: "k3d-%OS%-%ARCH%"
+          - name: krew
+            repo: kubernetes-sigs/krew
+            version: "{{ lookup('env', 'KREW_VERSION') | default('latest', true) }}"
+            filename: "krew-%OS%_%ARCH%.tar.gz"
+            extracted_filename: "krew-%OS%_%ARCH%"
+          - name: kube-linter
+            repo: stackrox/kube-linter
+            version: "{{ lookup('env', 'KUBE_LINTER_VERSION') | default('latest', true) }}"
+            filename: "kube-linter-%OS%.tar.gz"
+          - name: kube-bench
+            repo: aquasecurity/kube-bench
+            version: "{{ lookup('env', 'KUBE_BENCH_VERSION') | default('latest', true) }}"
+            filename: "kube-bench_%NVERSION%_%OS%_%ARCH%.tar.gz"

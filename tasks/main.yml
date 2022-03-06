@@ -1,0 +1,19 @@
+---
+
+- name: Ensure download location exists
+  ansible.builtin.file:
+    path: "{{ github_download_location }}"
+    state: directory
+    mode: '0755'
+
+- name: Ensure an auth header exists if using PAT token
+  set_fact:
+    github_download_api_headers:
+      Authorization: "token {{ github_download_pat_token }}"
+  when:
+    - github_download_pat_token is defined
+
+- include_tasks: ensure_download.yml
+  loop: "{{ github_download_packages }}"
+  loop_control:
+    loop_var: github_pkg

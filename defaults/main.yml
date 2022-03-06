@@ -1,0 +1,23 @@
+---
+
+# List of packages to download
+github_download_packages: []
+  # - name: package_name
+  #   repo: owner/repo
+  #   version: 1.0.2  # Can be 'latest'
+  #   filename: package_name-%VERSION%-%OS%-%ARCH%.tar.gz  # See filename templates in README.md
+  #   extracted_filename: package_name-%VERSION%
+  #   command: package_name install
+  #   command_become: false  # become root for this command
+
+# Download location
+github_download_location: "{{ ansible_user_dir }}/bin"
+
+# Github PAT Token
+# github_download_pat_token: "someToken"
+
+# Hostname for Github
+github_download_hostname: github.com
+
+# Hostname for the API if not api.github.com
+# github_download_api_hostname: "api.github.com"

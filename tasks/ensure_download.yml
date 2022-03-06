@@ -1,0 +1,104 @@
+---
+
+- name: Get the version information of the latest release of {{ github_pkg.name }}
+  ansible.builtin.uri:
+    url: "{{ github_download_hostname_api }}/repos/{{ github_pkg.repo }}/releases/latest"
+    return_content: true
+    body_format: json
+    headers: "{{ github_download_api_headers | default(omit) }}"
+  register: github_pkg_latest_release
+  when:
+    - github_pkg is not defined or github_pkg.version == "latest"
+
+- name: Ensure the version variable for {{ github_pkg.name }} is set
+  ansible.builtin.set_fact:
+    github_pkg_tag: "{{
+      github_pkg_latest_release.json.tag_name
+        | default(github_pkg.version)
+      }}"
+    github_pkg_version: "{{
+      (github_pkg_latest_release.json.tag_name
+          | replace(github_pkg.name + '/', ''))
+        | default(github_pkg.version)
+      }}"
+
+- name: Ensure the package facts for {{ github_pkg.name }} are set
+  ansible.builtin.set_fact:
+    github_pkg_filename: "{{
+      github_pkg.filename
+        | replace('%VERSION%', github_pkg_version)
+        | replace('%NVERSION%', github_pkg_version | regex_replace('^v', ''))
+        | replace('%OS%', ansible_system | lower)
+        | replace('%OSCAPITALIZED%', ansible_system)
+        | replace('%ARCH%', ansible_architecture | replace('x86_64', 'amd64'))
+        | replace('%ARCHRAW%', ansible_architecture)
+      }}"
+    github_pkg_extracted_filename: "{{
+      github_pkg.extracted_filename | default(github_pkg.name)
+        | replace('%VERSION%', github_pkg_version)
+        | replace('%NVERSION%', github_pkg_version | regex_replace('^v', ''))
+        | replace('%OS%', ansible_system | lower)
+        | replace('%OSCAPITALIZED%', ansible_system)
+        | replace('%ARCH%', ansible_architecture | replace('x86_64', 'amd64'))
+        | replace('%ARCHRAW%', ansible_architecture)
+      }}"
+    github_pkg_versioned_filename: "{{ github_pkg.name }}-{{ github_pkg_version | regex_replace('^v', '') }}"
+    github_pkg_extension: "{{ (github_pkg.filename | splitext)[1] }}"
+    github_pkg_url: "{{ github_download_url }}/{{ github_pkg.repo }}/releases/download"
+
+- name: Determine if {{ github_pkg_versioned_filename }} already exists
+  stat:
+    path: "{{ github_download_location }}/{{ github_pkg_versioned_filename }}"
+  register: github_pkg_check
+
+- name: Ensure {{ github_pkg.name }} is present
+  block:
+    - name: Ensure {{ github_pkg.name }} is downloaded and extracted
+      ansible.builtin.unarchive:
+        src: "{{ github_pkg_url }}/{{ github_pkg_tag }}/{{ github_pkg_filename }}"
+        dest: "{{ github_download_location }}"
+        remote_src: true
+      when:
+        - github_pkg_extension in github_pkg_archive_ext
+
+    - name: Ensure {{ github_pkg.name }} is downloaded
+      ansible.builtin.get_url:
+        url: "{{ github_pkg_url }}/{{ github_pkg_version }}/{{ github_pkg_filename }}"
+        dest: "{{ github_download_location }}/{{ github_pkg_versioned_filename }}"
+        mode: '0700'
+      when:
+        - github_pkg_extension not in github_pkg_archive_ext
+
+    - name: Ensure filename for {{ github_pkg.name }} is as expected
+      ansible.builtin.command:
+        cmd: >
+          mv
+            {{ github_download_location }}/{{ github_pkg_extracted_filename }}
+            {{ github_download_location }}/{{ github_pkg_versioned_filename }}
+        creates: "{{ github_download_location }}/{{ github_pkg_versioned_filename }}"
+      when:
+        - github_pkg_extension in github_pkg_archive_ext
+        - github_pkg_extracted_filename != github_pkg_versioned_filename
+
+    - name: Ensure {{ github_pkg.name }} is a symlink to {{ github_pkg_versioned_filename }}
+      ansible.builtin.file:
+        src: "{{ github_download_location }}/{{ github_pkg_versioned_filename }}"
+        dest: "{{ github_download_location }}/{{ github_pkg.name }}"
+        state: link
+  when:
+    - not github_pkg_check.stat.exists
+
+- name: Ensure {{ github_pkg.name }} is executable
+  ansible.builtin.file:
+    path: "{{ github_download_location }}/{{ github_pkg.name }}"
+    mode: '0700'
+
+- name: Ensure {{ github_pkg.name }} post-install commands are run
+  ansible.builtin.command:
+    cmd: "{{ github_pkg.command }}"
+  become: "{{ github_pkg.command_become | default(false) }}"
+  environment:
+    PATH: "{{ github_download_location }}:/usr/local/bin:/usr/bin:/bin"
+  when:
+    - github_pkg.command is defined
+    - github_pkg.command != ""
