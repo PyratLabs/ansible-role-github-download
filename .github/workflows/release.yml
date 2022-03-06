@@ -8,7 +8,7 @@ name: Release
 
 defaults:
   run:
-    working-directory: "xanmanning.terraform"
+    working-directory: "xanmanning.github_download"
 
 jobs:
   release:
@@ -18,7 +18,7 @@ jobs:
       - name: Checkout codebase
         uses: actions/checkout@v2
         with:
-          path: "xanmanning.terraform"
+          path: "xanmanning.github_download"
 
       - name: Set up Python 3
         uses: actions/setup-python@v2
