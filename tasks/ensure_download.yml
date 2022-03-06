@@ -101,4 +101,4 @@
     PATH: "{{ github_download_location }}:/usr/local/bin:/usr/bin:/bin"
   when:
     - github_pkg.command is defined
-    - github_pkg.command != ""
+    - github_pkg.command | length > 0
