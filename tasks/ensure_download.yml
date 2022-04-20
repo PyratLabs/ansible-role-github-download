@@ -47,7 +47,7 @@
     github_pkg_url: "{{ github_download_url }}/{{ github_pkg.repo }}/releases/download"
 
 - name: Determine if {{ github_pkg_versioned_filename }} already exists
-  stat:
+  ansible.builtin.stat:
     path: "{{ github_download_location }}/{{ github_pkg_versioned_filename }}"
   register: github_pkg_check
 

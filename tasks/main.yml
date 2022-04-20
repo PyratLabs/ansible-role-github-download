@@ -7,7 +7,7 @@
     mode: '0755'
 
 - name: Ensure an auth header exists if using PAT token
-  set_fact:
+  ansible.builtin.set_fact:
     github_download_api_headers:
       Authorization: "token {{ github_download_pat_token }}"
   when:

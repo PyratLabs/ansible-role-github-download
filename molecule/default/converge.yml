@@ -5,7 +5,7 @@
   become_user: engineer
   tasks:
     - name: "Include ansible-role-github-download"
-      include_role:
+      ansible.builtin.include_role:
         name: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') | basename }}"
       vars:
         github_download_packages:

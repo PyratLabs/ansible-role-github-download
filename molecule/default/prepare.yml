@@ -5,27 +5,27 @@
   become: true
   tasks:
     - name: Ensure a user group exists
-      group:
+      ansible.builtin.group:
         name: user
         state: present
 
     - name: Ensure a normal user exists
-      user:
+      ansible.builtin.user:
         name: engineer
         group: user
         state: present
 
     - name: Ensure apt cache is updated
-      apt:
+      ansible.builtin.apt:
         update_cache: true
       when: ansible_pkg_mgr == 'apt'
 
     - name: Ensure unzip is installed
-      package:
+      ansible.builtin.package:
         name: unzip
         state: present
 
     - name: Ensure git is installed
-      package:
+      ansible.builtin.package:
         name: git
         state: present
