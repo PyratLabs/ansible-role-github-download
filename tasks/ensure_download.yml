@@ -8,7 +8,7 @@
     headers: "{{ github_download_api_headers | default(omit) }}"
   register: github_pkg_latest_release
   when:
-    - github_pkg is not defined or github_pkg.version == "latest"
+    - github_pkg.version is not defined or github_pkg.version == "latest"
 
 - name: Ensure the version variable for {{ github_pkg.name }} is set
   ansible.builtin.set_fact:

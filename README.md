@@ -1,4 +1,4 @@
-# Ansible Role: github_download
+# Ansible Role: github_downloader
 
 Ansible role to download binary files from a GitHub Repository release to a
 desired location.
@@ -61,7 +61,7 @@ Example playbook for creating a list of users from GitHub
         command: package_name install
         command_become: false  # become root for this command
   roles:
-    - role: xanmanning.github_download
+    - role: xanmanning.github_downloader
 ```
 
 ## License
